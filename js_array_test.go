@@ -26,6 +26,13 @@ func Test_Push(t *testing.T) {
 	assert.Equal(t, arr_len, 3, "pushed arr length")
 }
 
+func Test_Unshift(t *testing.T) {
+	var arr = JsArray{0}
+	var arr_len = arr.Unshift(1, 2, 3)
+	assert.Equal(t, fmt.Sprint(arr), "[1 2 3 0]", "unshifted arr content")
+	assert.Equal(t, arr_len, 4, "unshifted arr length")
+}
+
 func Test_Join(t *testing.T) {
 	var arr = make(JsArray, 0)
 	arr.Push(1, "QAQ", 3)
@@ -92,6 +99,20 @@ func Test_FindIndex(t *testing.T) {
 		return v.(int) == 1
 	}
 	assert.Equal(t, arr.FindIndex(findIndex_handler), 3)
+}
+
+func Test_IndexOf(t *testing.T) {
+	item_1 := []int{2}
+	item_2 := func() {}
+	var arr = JsArray{1, "2", item_1, item_2}
+
+	assert.Equal(t, arr.IndexOf(0), -1)
+	assert.Equal(t, arr.IndexOf(1), 0)
+	assert.Equal(t, arr.IndexOf(int64(1)), -1)
+	assert.Equal(t, arr.IndexOf("2"), 1)
+	assert.Equal(t, arr.IndexOf(item_1), 2)
+	assert.Equal(t, arr.IndexOf(item_2), 3)
+	assert.Equal(t, arr.IndexOf(&item_2), -1)
 }
 
 func Test_Pop(t *testing.T) {

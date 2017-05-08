@@ -2,6 +2,7 @@ package jsergo
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -42,6 +43,11 @@ func (this *JsArray) Map(map_handle func(interface{}, int, *JsArray) interface{}
 		res[i] = return_item
 	}
 	return &res
+}
+func (this *JsArray) ForEach(map_handle func(interface{}, int, *JsArray)) {
+	for i, val := range *this {
+		map_handle(val, i, this)
+	}
 }
 func (this *JsArray) Filter(map_handle func(interface{}, int, *JsArray) bool) *JsArray {
 	var res = make(JsArray, len(*this))
@@ -126,6 +132,31 @@ func (this *JsArray) FindIndex(map_handle func(interface{}, int, *JsArray) bool)
 	}
 	return -1
 }
+func (this *JsArray) IndexOf(finder interface{}) int {
+	finder_type := reflect.TypeOf(finder)
+	if finder_type.Comparable() {
+		for i, val := range *this {
+			val_type := reflect.TypeOf(val)
+			// val_value := reflect.ValueOf(val)
+			if val_type.Comparable() && val == finder {
+				return i
+			}
+		}
+	} else {
+		// 直接对比指针
+		finder_value := reflect.ValueOf(finder)
+		finder_pointer := finder_value.Pointer()
+		for i, val := range *this {
+			if reflect.TypeOf(val) == finder_type {
+				val_pointer := reflect.ValueOf(val).Pointer()
+				if finder_pointer == val_pointer {
+					return i
+				}
+			}
+		}
+	}
+	return -1
+}
 
 func (this *JsArray) Pop() interface{} {
 	var total_len = len(*this)
@@ -187,6 +218,14 @@ func (this *JsArray) Shift() interface{} {
 		*this = res
 	}()
 	return (*this)[0]
+}
+func (this *JsArray) Unshift(push_args ...interface{}) int {
+	this.UnshiftWithoutReturn(push_args...)
+	return len(*this)
+}
+func (this *JsArray) UnshiftWithoutReturn(push_args ...interface{}) {
+	var res = append(push_args, *this...)
+	*this = res
 }
 
 func (this *JsArray) Slice(slice_args ...int) *JsArray {
